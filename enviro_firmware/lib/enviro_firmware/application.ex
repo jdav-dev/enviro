@@ -34,6 +34,10 @@ defmodule EnviroFirmware.Application do
       # Children for all targets except host
       # Starts a worker by calling: EnviroFirmware.Worker.start_link(arg)
       # {EnviroFirmware.Worker, arg},
+      %{
+        id: Bme280,
+        start: {Bme280, :start_link, [[], [name: EnviroFirmware.Bme280]]}
+      }
     ]
   end
 
