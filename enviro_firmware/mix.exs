@@ -23,7 +23,7 @@ defmodule EnviroFirmware.MixProject do
   def application do
     [
       mod: {EnviroFirmware.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:inets, :logger, :runtime_tools]
     ]
   end
 

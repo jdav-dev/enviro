@@ -47,6 +47,33 @@ if keys == [],
 config :nerves_ssh,
   authorized_keys: Enum.map(keys, &File.read!/1)
 
+ssid = System.get_env("SSID")
+psk = System.get_env("PSK")
+
+wlan0 =
+  if ssid && psk do
+    %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            key_mgmt: :wpa_psk,
+            ssid: System.fetch_env!("SSID"),
+            psk: System.fetch_env!("PSK")
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp}
+    }
+  else
+    IO.puts("""
+    environment variable SSID and/or PSK are missing
+    WIFI will not be configured on the target
+    """)
+
+    %{type: VintageNetWiFi}
+  end
+
 # Configure the network using vintage_net
 # See https://github.com/nerves-networking/vintage_net for more information
 config :vintage_net,
@@ -58,7 +85,7 @@ config :vintage_net,
        type: VintageNetEthernet,
        ipv4: %{method: :dhcp}
      }},
-    {"wlan0", %{type: VintageNetWiFi}}
+    {"wlan0", wlan0}
   ]
 
 config :mdns_lite,
