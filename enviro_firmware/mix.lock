@@ -1,4 +1,5 @@
 %{
+  "circuits_i2c": {:hex, :circuits_i2c, "0.3.7", "4f4b8b24f0883a2eab9c6e385b33ef76d68a1373d2b3744607a0ffd552f1c3ad", [:make, :mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "79e18bc457454c7c9a996931ae6575968eaad8518d070a81522434fc46cc6fa6"},
   "dns": {:hex, :dns, "2.2.0", "4721a79c2bccc25481930dffbfd06f40851321c3d679986af307111214bf124c", [:mix], [{:socket, "~> 0.3.13", [hex: :socket, repo: "hexpm", optional: false]}], "hexpm", "13ed1ef36ce896211ec6ce5e02709dbfb12aa61d6255bda8d531577a0a5a56e0"},
   "elixir_bme680": {:hex, :elixir_bme680, "0.2.1", "c3dbb32d4166c4cc15023836d5d98a397ac9995cc8401e84fc0024bc8ff3d3ea", [:make, :mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "c1d1211734371f6a167da6d284ab0370d7fa383e5ead8f92cf013bb5b0bdbe62"},
   "elixir_make": {:hex, :elixir_make, "0.6.1", "8faa29a5597faba999aeeb72bbb9c91694ef8068f0131192fb199f98d32994ef", [:mix], [], "hexpm", "35d33270680f8d839a4003c3e9f43afb595310a592405a00afc12de4c7f55a18"},

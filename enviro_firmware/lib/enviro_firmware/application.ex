@@ -37,7 +37,8 @@ defmodule EnviroFirmware.Application do
       %{
         id: Bme280,
         start: {Bme280, :start_link, [[], [name: EnviroFirmware.Bme280]]}
-      }
+      },
+      EnviroFirmware.Ltr559
     ]
   end
 
