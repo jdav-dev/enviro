@@ -41,6 +41,7 @@ defmodule EnviroFirmware.MixProject do
       {:nerves_pack, "~> 0.4.0", targets: @all_targets},
       {:elixir_bme680, "~> 0.2.1", targets: @all_targets},
       {:circuits_i2c, "~> 0.3.7", targets: @all_targets},
+      {:st7735, path: "../st7735", targets: @all_targets},
 
       # Dependencies for specific targets
       {:nerves_system_rpi0, "~> 1.13", runtime: false, targets: :rpi0}
