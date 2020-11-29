@@ -1,6 +1,8 @@
 defmodule EnviroDisplay.MixProject do
   use Mix.Project
 
+  @all_targets [:rpi0]
+
   def project do
     [
       app: :enviro_display,
@@ -15,7 +17,7 @@ defmodule EnviroDisplay.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {EnviroDisplay, []},
+      mod: {EnviroDisplay.Application, []},
       extra_applications: [:crypto]
     ]
   end
@@ -23,8 +25,9 @@ defmodule EnviroDisplay.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:scenic, "~> 0.10"},
-      {:scenic_driver_glfw, "~> 0.10", targets: :host}
+      {:scenic, "~> 0.10.3"},
+      {:scenic_driver_glfw, "~> 0.10.1", targets: :host},
+      {:scenic_driver_nerves_rpi, "~> 0.10.1", targets: @all_targets}
     ]
   end
 end

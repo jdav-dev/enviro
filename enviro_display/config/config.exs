@@ -5,13 +5,13 @@ use Mix.Config
 # Configure the main viewport for the Scenic application
 config :enviro_display, :viewport, %{
   name: :main_viewport,
-  size: {700, 600},
+  size: {160, 80},
   default_scene: {EnviroDisplay.Scene.Home, nil},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,
       name: :glfw,
-      opts: [resizeable: false, title: "enviro_display"]
+      opts: [resizeable: false, title: "enviro"]
     }
   ]
 }
