@@ -9,6 +9,7 @@ defmodule EnviroDisplay.Application do
 
     # start the application with the viewport
     children = [
+      Scenic.Sensor,
       {Scenic, viewports: [main_viewport_config]}
     ]
 

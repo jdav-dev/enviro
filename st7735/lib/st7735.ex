@@ -22,7 +22,6 @@ defmodule ST7735 do
 
   @default_width 80
   @default_height 160
-  @default_rotation 270
   @default_invert true
 
   @st7735_cols 132
@@ -33,8 +32,8 @@ defmodule ST7735 do
     GenServer.start_link(__MODULE__, st7735_opts, name: name)
   end
 
-  def display(server \\ __MODULE__, image) do
-    GenServer.cast(server, {:display, image})
+  def display(server \\ __MODULE__, data) when is_binary(data) do
+    GenServer.cast(server, {:display, data})
   end
 
   @impl GenServer
@@ -48,7 +47,6 @@ defmodule ST7735 do
 
     width = opts[:width] || @default_width
     height = opts[:height] || @default_height
-    rotation = opts[:rotation] || @default_rotation
     invert = opts[:invert] || @default_invert
     offset_left = opts[:offset_left] || div(@st7735_cols - width, 2)
     offset_top = opts[:offset_top] || div(@st7735_rows - height, 2)
@@ -63,7 +61,6 @@ defmodule ST7735 do
         invert: invert,
         offset_left: offset_left,
         offset_top: offset_top,
-        rotation: rotation,
         spi_buffer_size: spi_buffer_size,
         spi_bus: spi_bus,
         width: width
@@ -89,10 +86,13 @@ defmodule ST7735 do
   end
 
   @impl GenServer
-  def handle_cast({:display, image}, state) do
+  def handle_cast({:display, data}, state) do
     set_window(state)
-    data(state, image)
-    {:noreply, state}
+
+    case data(data, state) do
+      {:ok, _} -> {:noreply, state}
+      error -> {:stop, error, state}
+    end
   end
 
   @impl GenServer
@@ -117,62 +117,62 @@ defmodule ST7735 do
     # Frame rate ctrl - normal mode
     frmctr1(state)
     # Rate = fosc/(1x2+40) * (LINE+2C+2D)
-    data(state, 0x01)
-    data(state, 0x2C)
-    data(state, 0x2D)
+    data(0x01, state)
+    data(0x2C, state)
+    data(0x2D, state)
 
     # Frame rate ctrl - idle mode
     frmctr2(state)
     # Rate = fosc/(1x2+40) * (LINE+2C+2D)
-    data(state, 0x01)
-    data(state, 0x2C)
-    data(state, 0x2D)
+    data(0x01, state)
+    data(0x2C, state)
+    data(0x2D, state)
 
     # Frame rate ctrl - partial mode
     frmctr3(state)
     # Dot inversion mode
-    data(state, 0x01)
-    data(state, 0x2C)
-    data(state, 0x2D)
+    data(0x01, state)
+    data(0x2C, state)
+    data(0x2D, state)
     # Line inversion mode
-    data(state, 0x01)
-    data(state, 0x2C)
-    data(state, 0x2D)
+    data(0x01, state)
+    data(0x2C, state)
+    data(0x2D, state)
 
     # Display inversion ctrl
     invctr(state)
     # No inversion
-    data(state, 0x07)
+    data(0x07, state)
 
     # Power control
     pwctr1(state)
-    data(state, 0xA2)
+    data(0xA2, state)
     # -4.6V
-    data(state, 0x02)
+    data(0x02, state)
     # auto mode
-    data(state, 0x84)
+    data(0x84, state)
 
     # Power control
     pwctr2(state)
     # Opamp current small
-    data(state, 0x0A)
+    data(0x0A, state)
     # Boost frequency
-    data(state, 0x00)
+    data(0x00, state)
 
     # Power control
     pwctr4(state)
     # BCLK/2, Opamp current small & Medium low
-    data(state, 0x8A)
-    data(state, 0x2A)
+    data(0x8A, state)
+    data(0x2A, state)
 
     # Power control
     pwctr5(state)
-    data(state, 0x8A)
-    data(state, 0xEE)
+    data(0x8A, state)
+    data(0xEE, state)
 
     # Power control
     vmctr1(state)
-    data(state, 0x0E)
+    data(0x0E, state)
 
     case invert do
       true -> invon(state)
@@ -182,68 +182,68 @@ defmodule ST7735 do
     # Memory access control (directions)
     madctl(state)
     # row addr/col addr, bottom to top refresh
-    data(state, 0xC8)
+    data(0xC8, state)
 
     # set color mode
     colmod(state)
     # 16-bit color
-    data(state, 0x05)
+    data(0x05, state)
 
     # Column addr set
     caset(state)
     # XSTART = 0
-    data(state, 0x00)
-    data(state, offset_left)
+    data(0x00, state)
+    data(offset_left, state)
     # XEND = ROWS - height
-    data(state, 0x00)
-    data(state, width + offset_left - 1)
+    data(0x00, state)
+    data(width + offset_left - 1, state)
 
     # Row addr set
     raset(state)
     # XSTART = 0
-    data(state, 0x00)
-    data(state, offset_top)
+    data(0x00, state)
+    data(offset_top, state)
     # XEND = COLS - width
-    data(state, 0x00)
-    data(state, height + offset_top - 1)
+    data(0x00, state)
+    data(height + offset_top - 1, state)
 
     # Set Gamma
     gmctrp1(state)
-    data(state, 0x02)
-    data(state, 0x1C)
-    data(state, 0x07)
-    data(state, 0x12)
-    data(state, 0x37)
-    data(state, 0x32)
-    data(state, 0x29)
-    data(state, 0x2D)
-    data(state, 0x29)
-    data(state, 0x25)
-    data(state, 0x2B)
-    data(state, 0x39)
-    data(state, 0x00)
-    data(state, 0x01)
-    data(state, 0x03)
-    data(state, 0x10)
+    data(0x02, state)
+    data(0x1C, state)
+    data(0x07, state)
+    data(0x12, state)
+    data(0x37, state)
+    data(0x32, state)
+    data(0x29, state)
+    data(0x2D, state)
+    data(0x29, state)
+    data(0x25, state)
+    data(0x2B, state)
+    data(0x39, state)
+    data(0x00, state)
+    data(0x01, state)
+    data(0x03, state)
+    data(0x10, state)
 
     # Set Gamma
     gmctrn1(state)
-    data(state, 0x03)
-    data(state, 0x1D)
-    data(state, 0x07)
-    data(state, 0x06)
-    data(state, 0x2E)
-    data(state, 0x2C)
-    data(state, 0x29)
-    data(state, 0x2D)
-    data(state, 0x2E)
-    data(state, 0x2E)
-    data(state, 0x37)
-    data(state, 0x3F)
-    data(state, 0x00)
-    data(state, 0x00)
-    data(state, 0x02)
-    data(state, 0x10)
+    data(0x03, state)
+    data(0x1D, state)
+    data(0x07, state)
+    data(0x06, state)
+    data(0x2E, state)
+    data(0x2C, state)
+    data(0x29, state)
+    data(0x2D, state)
+    data(0x2E, state)
+    data(0x2E, state)
+    data(0x37, state)
+    data(0x3F, state)
+    data(0x00, state)
+    data(0x00, state)
+    data(0x02, state)
+    data(0x10, state)
 
     # Normal display on
     noron(state)
@@ -272,39 +272,35 @@ defmodule ST7735 do
 
     # Column addr set
     caset(state)
-    # XSTART
-    data(state, <<x0::16>>)
-    # XEND
-    data(state, <<x1::16>>)
+    # XSTART and XEND
+    data(<<x0::16, x1::16>>, state)
 
     # Row addr set
     raset(state)
-    # YSTART
-    data(state, <<y0::16>>)
-    # YEND
-    data(state, <<y1::16>>)
+    # YSTART and YEND
+    data(<<y0::16, y1::16>>, state)
 
     # write to RAM
     ramwr(state)
   end
 
-  defp data(state, data) when is_integer(data) and 0 <= data and data <= 255 do
-    data(state, <<data>>)
+  defp data(data, state) when is_integer(data) and 0 <= data and data <= 255 do
+    data(<<data>>, state)
   end
 
-  defp data(%State{spi_buffer_size: spi_buffer_size} = state, data)
+  defp data(data, %State{spi_buffer_size: spi_buffer_size} = state)
        when is_binary(data) and byte_size(data) > spi_buffer_size do
     data
     |> :erlang.binary_to_list()
     |> Enum.chunk_every(spi_buffer_size)
     |> Enum.map(&:erlang.list_to_binary/1)
     |> Enum.reduce_while({:ok, ""}, fn
-      chunk, {:ok, _} -> {:cont, data(state, chunk)}
+      chunk, {:ok, _} -> {:cont, data(chunk, state)}
       _chunk, error -> {:halt, error}
     end)
   end
 
-  defp data(%State{data_command_selection: data_command_selection, spi_bus: spi_bus}, data)
+  defp data(data, %State{data_command_selection: data_command_selection, spi_bus: spi_bus})
        when is_binary(data) do
     data_mode(data_command_selection)
     @spi_mod.transfer(spi_bus, data)

@@ -8,7 +8,6 @@ defmodule ST7735.State do
     :invert,
     :offset_left,
     :offset_top,
-    :rotation,
     :spi_buffer_size,
     :spi_bus,
     :width

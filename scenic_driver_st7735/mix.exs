@@ -1,5 +1,7 @@
-defmodule ScenicDriverSt7735.MixProject do
+defmodule ScenicDriverST7735.MixProject do
   use Mix.Project
+
+  @all_targets [:rpi0]
 
   def project do
     [
@@ -21,8 +23,12 @@ defmodule ScenicDriverSt7735.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:scenic, "~> 0.10.3"},
+
+      # Dependencies for all targets except :host
+      {:scenic_driver_nerves_rpi, "~> 0.10.1", targets: @all_targets},
+      {:rpi_fb_capture, "~> 0.3.0", targets: @all_targets},
+      {:st7735, path: "../st7735", targets: @all_targets}
     ]
   end
 end

@@ -1,6 +1,6 @@
-# ScenicDriverSt7735
+# ScenicDriverST7735
 
-**TODO: Add description**
+Scenic driver for ST7735-controlled displays.
 
 ## Installation
 
@@ -18,4 +18,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/scenic_driver_st7735](https://hexdocs.pm/scenic_driver_st7735).
-

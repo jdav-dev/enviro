@@ -26,6 +26,7 @@ defmodule EnviroDisplay.MixProject do
   defp deps do
     [
       {:scenic, "~> 0.10.3"},
+      {:scenic_sensor, "~> 0.7.0"},
       {:scenic_driver_glfw, "~> 0.10.1", targets: :host},
       {:scenic_driver_nerves_rpi, "~> 0.10.1", targets: @all_targets}
     ]

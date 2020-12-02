@@ -3,6 +3,7 @@ if Code.ensure_loaded?(Circuits.I2C) do
     use GenServer
 
     alias Circuits.I2C
+    alias Scenic.Sensor
 
     @bus "i2c-1"
     @address 0x23
@@ -21,8 +22,10 @@ if Code.ensure_loaded?(Circuits.I2C) do
     def init(_opts) do
       with :ok <- File.write("/sys/module/i2c_bcm2708/parameters/combined", "1"),
            {:ok, ref} <- I2C.open(@bus),
-           :ok <- init_sensor(ref) do
-        schedule_update_sensor()
+           :ok <- init_sensor(ref),
+           {:ok, :lux} <- Sensor.register(:lux, "0.1.0", "light sensor"),
+           {:ok, :proximity} <- Sensor.register(:proximity, "0.1.0", "proximity sensor") do
+        send(self(), :update_sensor)
         {:ok, %{lux: nil, proximity: nil, ref: ref}}
       else
         error -> {:stop, error}
@@ -127,10 +130,6 @@ if Code.ensure_loaded?(Circuits.I2C) do
       I2C.write!(ref, @address, register <> data)
     end
 
-    defp schedule_update_sensor do
-      Process.send_after(self(), :update_sensor, 50)
-    end
-
     @impl GenServer
     def handle_call(:get_readings, _from, %{lux: lux, proximity: proximity} = state) do
       {:reply, %{lux: lux, proximity: proximity}, state}
@@ -149,17 +148,27 @@ if Code.ensure_loaded?(Circuits.I2C) do
 
       updated_lux =
         case als_data do
-          0 -> lux
-          1 -> read_lux(ref)
+          0 ->
+            lux
+
+          1 ->
+            updated_lux = read_lux(ref)
+            Sensor.publish(:lux, updated_lux)
+            updated_lux
         end
 
       updated_proximity =
         case ps_data do
-          0 -> proximity
-          1 -> read_proximity(ref)
+          0 ->
+            proximity
+
+          1 ->
+            updated_proximity = read_proximity(ref)
+            Sensor.publish(:proximity, updated_proximity)
+            updated_proximity
         end
 
-      schedule_update_sensor()
+      Process.send_after(self(), :update_sensor, :timer.seconds(1))
       {:noreply, %{state | lux: updated_lux, proximity: updated_proximity}}
     end
 
